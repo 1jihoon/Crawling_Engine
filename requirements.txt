@@ -1,0 +1,17 @@
+pydantic>=2,<3
+PyYAML>=6
+requests>=2.32
+urllib3>=2
+lxml>=5.2
+beautifulsoup4>=4.12
+
+selenium>=4.21
+webdriver-manager>=4.0
+
+# DB 드라이버(플랫폼별 자동 선택)
+psycopg2-binary==2.9.9 ; platform_system == "Windows"
+psycopg2==2.9.9        ; platform_system != "Windows"
+
+SQLAlchemy>=2.0
+redis>=5
+python-dotenv
