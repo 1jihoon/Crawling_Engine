@@ -55,3 +55,6 @@ coverage.xml
 .DS_Store
 Thumbs.db
 *.iml
+
+# ===== txt 파일 =====
+cookies.txt
