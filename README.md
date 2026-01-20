@@ -70,3 +70,24 @@ util 스크립트로 분리해 관리했습니다.
 그 결과 약 80~90% 수준의 데이터 정합성을 확보했고,
 완벽한 자동화보다 운영 가능성과 데이터 품질을 우선하는 방향으로
 구현 범위를 설정했습니다.
+
+
+## 4. 문제 ③ 크롤링 엔진 활용
+전체 서비스 중 **Core Crawling Engine(Python)** 부분을 전담하여 개발했습니다.  
+Spring Boot와 **ProcessBuilder(CLI)** 방식으로 연동되며, 온디맨드(On-demand) 요청 시 실행됩니다.
+
+```mermaid
+flowchart LR
+    User([사용자]) -->|1. 클릭 (요청)| Client[Frontend\n(React)]
+    Client -->|2. API 호출| Server[Backend\n(Spring Boot)]
+    
+    subgraph "My Contribution (Core Engine)"
+    Server == "3. CLI 실행 (ProcessBuilder)" ==> Python[🐍 Python Crawling Engine]
+    Python -->|4. 데이터 수집 & 파싱| Sites(대상 사이트\n큐넷/민간 자격증 사이트)
+    end
+    
+    Python -- "5. 표준 JSON 반환" --> Server
+    Server -->|6. 데이터 적재| DB[(PostgreSQL)]
+    
+    style Python fill:#f9f,stroke:#333,stroke-width:4px,color:black
+    style Sites fill:#eee,stroke:#333,stroke-dasharray: 5 5
