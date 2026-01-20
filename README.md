@@ -78,16 +78,16 @@ Spring Boot와 **ProcessBuilder(CLI)** 방식으로 연동되며, 온디맨드(O
 
 ```mermaid
 flowchart LR
-    User([사용자]) -->|1. 클릭 (요청)| Client[Frontend\n(React)]
-    Client -->|2. API 호출| Server[Backend\n(Spring Boot)]
+    User([사용자]) -->|1. 클릭 요청| Client["Frontend<br/>(React)"]
+    Client -->|2. API 호출| Server["Backend<br/>(Spring Boot)"]
     
     subgraph "My Contribution (Core Engine)"
-    Server == "3. CLI 실행 (ProcessBuilder)" ==> Python[🐍 Python Crawling Engine]
-    Python -->|4. 데이터 수집 & 파싱| Sites(대상 사이트\n큐넷/민간 자격증 사이트)
+    Server == "3. CLI 실행 (ProcessBuilder)" ==> Python["🐍 Python Crawling Engine"]
+    Python -->|4. 데이터 수집 & 파싱| Sites("대상 사이트<br/>(큐넷/민간 자격증 사이트)")
     end
     
     Python -- "5. 표준 JSON 반환" --> Server
-    Server -->|6. 데이터 적재| DB[(PostgreSQL)]
+    Server -->|6. 데이터 적재| DB[("DB<br/>(PostgreSQL)")]
     
     style Python fill:#f9f,stroke:#333,stroke-width:4px,color:black
     style Sites fill:#eee,stroke:#333,stroke-dasharray: 5 5
