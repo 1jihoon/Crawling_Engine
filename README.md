@@ -91,6 +91,7 @@ flowchart LR
     
     style Python fill:#f9f,stroke:#333,stroke-width:4px,color:black
     style Sites fill:#eee,stroke:#333,stroke-dasharray: 5 5
+```
 
 ##5. 멀티 플랫폼 지원 (Cross-platform Support) 
 Windows & Linux (Fedora) 완벽 대응: 
