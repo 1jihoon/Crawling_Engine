@@ -91,3 +91,51 @@ flowchart LR
     
     style Python fill:#f9f,stroke:#333,stroke-width:4px,color:black
     style Sites fill:#eee,stroke:#333,stroke-dasharray: 5 5
+
+##5. 멀티 플랫폼 지원 (Cross-platform Support) 
+Windows & Linux (Fedora) 완벽 대응: 
+기존 Windows 환경뿐만 아니라, 실제 서버 운영 환경인 Linux(Fedora) 환경에서도 데이터 수집 및 정규화 로직이 동일하게 작동함을 검증함.
+
+의존성 최적화: 
+Python 3.14 환경과의 호환성을 위해 psycopg2-binary 버전을 2.9.11로 상향 조정하여, OS에 구애받지 않는 통합 라이브러리 설정을 완료함.
+
+##6. Linux 환경 설정 가이드 (Environment Setup)
+
+# 1. 시스템 필수 패키지 설치 (Fedora 기준)
+sudo dnf install gcc postgresql-devel
+
+# 2. 가상환경 구축 및 의존성 설치
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+
+# 3. Linux
+
+# 가상환경 활성화
+source .venv/bin/activate
+
+# 엔진 실행 (공공 자격증)
+python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
+
+##6-2. Window  환경 설정 가이드 (Environment Setup)
+
+**Windows에서 Python 설치(권장):**
+winget install Python.Python.3.11
+
+# 2. 가상환경 구축 및 의존성 설치
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+
+#3. Windows
+
+# 가상환경 활성화
+.\.venv\Scripts\activate
+
+# 엔진 실행 (공공 자격증)
+python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
+
+
+
