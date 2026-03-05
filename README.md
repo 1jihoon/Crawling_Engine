@@ -93,7 +93,7 @@ flowchart LR
     style Sites fill:#eee,stroke:#333,stroke-dasharray: 5 5
 ```
 
-##5. 멀티 플랫폼 지원 (Cross-platform Support) 
+## 5. 멀티 플랫폼 지원 (Cross-platform Support) 
 
 본 프로젝트는 개발 환경(Windows)과 운영 환경(Linux) 모두에서 동일하게 작동하도록 설계되었습니다. [cite: 2026-03-04]
 
@@ -105,18 +105,21 @@ flowchart LR
 
 ---
 
-##6. Linux 환경 설정 가이드 (Environment Setup)
+## 6. Linux 환경 설정 가이드 (Environment Setup)
 
 ### 1. Linux (Fedora 기준)
 1. **시스템 패키지 설치**
    ```bash
    sudo dnf install gcc postgresql-devel
+   ```
 
-# 2. 가상환경 구축 및 의존성 설치
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip
-pip install -r requirements.txt
+2. **가상환경 구축 및 의존성 설치**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   python -m pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
 
 # 3. Linux
 
