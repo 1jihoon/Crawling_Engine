@@ -126,7 +126,7 @@ flowchart LR
    source .venv/bin/activate
    ```
 
-4. ** 엔진 실행 (공공 자격증)**
+4. **엔진 실행 (공공 자격증)**
    ```bash
    python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
    ```
@@ -147,12 +147,12 @@ flowchart LR
    python -m pip install -r requirements.txt
    ```
 
-3. ** 가상환경 활성화**
+3. **가상환경 활성화**
    ```bash
    .\.venv\Scripts\activate
    ```
 
-4. ** 엔진 실행 (공공 자격증)**
+4. **엔진 실행 (공공 자격증)**
    ```bash
    python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
    ```
