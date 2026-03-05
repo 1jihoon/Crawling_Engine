@@ -107,7 +107,7 @@ flowchart LR
 
 ## 6. Linux 환경 설정 가이드 (Environment Setup)
 
-### 1. Linux (Fedora 기준)
+## 1. Linux (Fedora 기준)
 1. **시스템 패키지 설치**
    ```bash
    sudo dnf install gcc postgresql-devel
@@ -121,32 +121,38 @@ flowchart LR
    pip install -r requirements.txt
    ```
 
-# 3. Linux
+3. **가상환경 활성화**
+   ```bash
+   source .venv/bin/activate
+   ```
 
-# 가상환경 활성화
-source .venv/bin/activate
+4. ** 엔진 실행 (공공 자격증)**
+   ```bash
+   python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
+   ```
 
-# 엔진 실행 (공공 자격증)
-python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
+## 6-2. Window  환경 설정 가이드 (Environment Setup)
 
-##6-2. Window  환경 설정 가이드 (Environment Setup)
+## 1. Windows
+1. **Python 설치**
+   ```bash
+   winget install Python.Python.3.11
+   ```
 
-**Windows에서 Python 설치(권장):**
-winget install Python.Python.3.11
+2. **가상환경 구축 및 의존성 설치**
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
+   python -m pip install --upgrade pip
+   python -m pip install -r requirements.txt
+   ```
 
-# 2. 가상환경 구축 및 의존성 설치
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+3. ** 가상환경 활성화**
+   ```bash
+   .\.venv\Scripts\activate
+   ```
 
-#3. Windows
-
-# 가상환경 활성화
-.\.venv\Scripts\activate
-
-# 엔진 실행 (공공 자격증)
-python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
-
-
-
+4. ** 엔진 실행 (공공 자격증)**
+   ```bash
+   python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
+   ```
