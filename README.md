@@ -94,16 +94,23 @@ flowchart LR
 ```
 
 ##5. 멀티 플랫폼 지원 (Cross-platform Support) 
-Windows & Linux (Fedora) 완벽 대응: 
-기존 Windows 환경뿐만 아니라, 실제 서버 운영 환경인 Linux(Fedora) 환경에서도 데이터 수집 및 정규화 로직이 동일하게 작동함을 검증함.
 
-의존성 최적화: 
-Python 3.14 환경과의 호환성을 위해 psycopg2-binary 버전을 2.9.11로 상향 조정하여, OS에 구애받지 않는 통합 라이브러리 설정을 완료함.
+본 프로젝트는 개발 환경(Windows)과 운영 환경(Linux) 모두에서 동일하게 작동하도록 설계되었습니다. [cite: 2026-03-04]
+
+| 항목 | 상세 내용 |
+| :--- | :--- |
+| **지원 OS** | Windows 10/11, Fedora Linux (Server) [cite: 2026-03-03, 2026-03-04] |
+| **의존성 최적화** | `psycopg2-binary==2.9.11` 적용으로 OS별 라이브러리 충돌 해결 |
+| **검증 완료** | 공공(Q-Net) 및 민간(KAIT) 자격증 데이터 정규화 테스트 통과 [cite: 2026-03-04] |
+
+---
 
 ##6. Linux 환경 설정 가이드 (Environment Setup)
 
-# 1. 시스템 필수 패키지 설치 (Fedora 기준)
-sudo dnf install gcc postgresql-devel
+### 1. Linux (Fedora 기준)
+1. **시스템 패키지 설치**
+   ```bash
+   sudo dnf install gcc postgresql-devel
 
 # 2. 가상환경 구축 및 의존성 설치
 python3 -m venv .venv
