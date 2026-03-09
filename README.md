@@ -131,6 +131,11 @@ flowchart LR
    python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
    ```
 
+5. **엔진 실행(민간 자격증)**
+   ```bash
+   python run_once.py --cert linux_master --config private-cert-crawl/configs/cert_map.yaml
+   ```
+
 ## 6-2. Window  환경 설정 가이드 (Environment Setup)
 
 ## 1. Windows
@@ -155,4 +160,9 @@ flowchart LR
 4. **엔진 실행 (공공 자격증)**
    ```bash
    python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
+   ```
+
+5. **엔진 실행(민간 자격증)**
+   ```bash
+   python run_once.py --cert linux_master --config private-cert-crawl/config>
    ```
