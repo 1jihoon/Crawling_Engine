@@ -164,5 +164,5 @@ flowchart LR
 
 5. **엔진 실행(민간 자격증)**
    ```bash
-   python run_once.py --cert linux_master --config private-cert-crawl/config>
+   python run_once.py --cert linux_master --config private-cert-crawl/configs/cert_map.yaml
    ```
