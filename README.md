@@ -21,7 +21,7 @@ Pipeline: fetch → parse → normalize → output(JSON)
 - **타임아웃·재시도·스냅샷(HTML 저장)·중복 제거**로 실패 케이스 제어
 
 ## 코드 읽기 가이드
-- `public_cert_api/` : 공공(Q-Net) 처리 러너
+- `public_cert_api/` : 공공(Q-Net) 크롤러 모음
 - `private-cert-crawl/` : 민간/사설 크롤러 모음
 
 ## 보안
