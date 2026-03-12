@@ -5,6 +5,11 @@
 
 Pipeline: fetch → parse → normalize → output(JSON)
 
+> [!IMPORTANT]
+> ### 📢 Notice: Intellectual Property Protection (Patent Pending)
+> * 본 프로젝트에 적용된 **'비정형 데이터 대응 다중 규칙 엔진'** 로직은 현재 **특허 출원 절차를 진행 중**에 있습니다.
+> * 600개 이상의 자격증 사이트(Q-Net 등)의 각기 다른 구조를 통합 처리하는 독자적인 기술이 포함되어 있으며, 무단 도용 및 상업적 이용을 금합니다.
+
 ## 프로젝트 개요
 - 자격증 정보가 여러 사이트에 분산되어 있어 관리가 어렵다는 문제에서 출발
 - 공공/민간 자격증 데이터를 표준 JSON 구조로 통합
