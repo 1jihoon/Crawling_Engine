@@ -98,7 +98,7 @@ def augment_paras_with_virtual_sections(paras: List[str], html: str) -> List[str
     - 탐지되면 paras에 '가상 라벨 + 본문'을 문서 순서대로 주입
     - 같은 라벨이 이미 있으면 중복 삽입하지 않음
     """
-    soup = BeautifulSoup(html or "", "html.parser")
+    soup = BeautifulSoup(html or "", "lxml")
     injections: List[Tuple[int, List[str]]] = []
     seen_label = set()
 

@@ -112,7 +112,7 @@ def fetch_jmcd_list(session: requests.Session, inst: str, qual: str = "T") -> Li
 
     jmcds: Set[str] = set(re.findall(r"jmCd\s*=\s*['\"]?(\d{4})['\"]?", html))
     if not jmcds and BeautifulSoup is not None:
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, "lxml")
         for a in soup.select("a[href*='jmCd=']"):
             m = re.search(r"jmCd=(\d{4})", a.get("href", ""))
             if m:

@@ -41,7 +41,7 @@ def _deep_unescape(s: str, max_rounds: int = 8) -> str:
 
 def _bs_tables(html_fragment: str) -> list[dict]:
     out = []
-    soup = BeautifulSoup(html_fragment, "html.parser")
+    soup = BeautifulSoup(html_fragment, "lxml")
     for i, tbl in enumerate(soup.find_all("table")):
         rows = []
         for tr in tbl.find_all("tr"):
@@ -80,25 +80,28 @@ def _gather_tables_from_selectors(soup: BeautifulSoup) -> list[dict]:
 
 def collect_links(soup: BeautifulSoup) -> list[dict]:
     out = []
-    for el in soup.select("a, button"):
-        text = clean(el.get_text(" ", strip=True))
-        href = (el.get("href") or "").strip()
-        onclick = (el.get("onclick") or "").strip()
-        rec = {}
-        if text: rec["text"] = text
-        if href and href != "#": rec["href"] = urljoin(BASE, href)
-        m = re.search(r"cst006Report\('(\d+)'\s*,\s*'(\d+)'\)", onclick)
-        if m: rec["action"] = {"fn": "cst006Report", "jmcd": m.group(1), "code": m.group(2)}
-        m = re.search(r"fileDown\('([^']+)'\s*,\s*'([^']+)'", onclick)
-        if m: rec["download"] = {"fn": "fileDown", "path": m.group(1), "filename": m.group(2)}
-        if rec: out.append(rec)
+    # 1. 원본 soup + 모든 textarea 내부 HTML을 하나의 리스트(chunks)로 모음
+    chunks = [soup]
+    for ta in soup.find_all('textarea'):
+        raw_html = ta.get_text(strip=True)
+        if "<a" in raw_html.lower():
+            chunks.append(BeautifulSoup(raw_html, "lxml"))
 
-    # dedupe
+    # 2. 모든 덩어리에서 링크 추출
+    for snp in chunks:
+        for el in snp.select("a, button"):
+            text = clean(el.get_text(" ", strip=True))
+            href = (el.get("href") or "").strip()
+            if text:
+                out.append({
+                    "text": text, 
+                    "href": urljoin(BASE, href) if href and href != "#" else None
+                })
+
+    # 3. 마지막에 한 번에 중복 제거
     seen, uniq = set(), []
     for r in out:
-        key = (r.get("text"), r.get("href"),
-               tuple(sorted((r.get("action") or {}).items())) ,
-               tuple(sorted((r.get("download") or {}).items())))
+        key = (r.get("text"), r.get("href"))
         if key not in seen:
             seen.add(key); uniq.append(r)
     return uniq
@@ -108,9 +111,17 @@ def collect_paragraphs(soup: BeautifulSoup) -> list[str]:
     for tag in soup.find_all(["p", "li", "div", "td", "th", "a", "span", "b", "strong"]):
         t = clean(tag.get_text(" ", strip=True))
         if t: paras.append(t)
+
     for ta in soup.select('textarea[id^="contents_text_"]'):
-        txt = clean(ta.get_text(" ", strip=True))
+        raw_val = ta.get_text(strip=True)
+        # [방어 로직] 만약 텍스트 안에 HTML 태그가 숨어있다면? (리눅스용 필터)
+        if "<html" in raw_val.lower() or "<p" in raw_val.lower():
+            # 태그를 떼어내기 위해 한 번 더 파싱 (윈도우에선 이 조건이 안 걸릴 확률이 높음)
+            raw_val = BeautifulSoup(raw_val, "lxml").get_text(" ", strip=True)
+        
+        txt = clean(raw_val)
         if txt: paras.append(txt)
+
     # dedupe
     seen, uniq = set(), []
     for t in paras:
@@ -138,7 +149,7 @@ def _images_from_dom_block(block) -> list[str]:
 
 def _images_from_html_fragment(html_fragment: str) -> list[str]:
     if not html_fragment: return []
-    frag = BeautifulSoup(html_fragment, "html.parser")
+    frag = BeautifulSoup(html_fragment, "lxml")
     return _images_from_dom_block(frag)
 
 def _images_from_near_table(dom_tbl_list, idx) -> list[str]:
@@ -162,7 +173,7 @@ def _images_from_near_table(dom_tbl_list, idx) -> list[str]:
 # ──────────────────────────────────────────────────────────────────────────────
 def parse_file(html_path: Path) -> dict:
     html = read_html(html_path)
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
     for bad in soup(["script", "style", "noscript"]): bad.decompose()
 
     body_len = len(soup.get_text(" ", strip=True))
@@ -310,7 +321,7 @@ def _collect_section_images_by_heading(
 # ──────────────────────────────────────────────────────────────────────────────
 def parse_exam_info_file(html_path: Path) -> dict:
     html = read_html(html_path)
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
     for bad in soup(["script", "style", "noscript"]):
         bad.decompose()
 
