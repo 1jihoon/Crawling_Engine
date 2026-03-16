@@ -39,6 +39,14 @@ def _deep_unescape(s: str, max_rounds: int = 8) -> str:
                 .replace("&lt;", "<").replace("&gt;", ">")
                 .replace("&quot;", '"').replace("&apos;", "'"))
 
+def sanitize_text(txt: str) -> str:
+    """텍스트 내부에 HTML 태그가 잔존할 경우 제거 (리눅스 lxml 대응)"""
+    if not txt: return ""
+    # <p, <br, <span 등 태그 기호가 보인다면 한 번 더 파싱
+    if "<" in txt and ">" in txt:
+        txt = BeautifulSoup(txt, "lxml").get_text(" ", strip=True)
+    return clean(txt)
+
 def _bs_tables(html_fragment: str) -> list[dict]:
     out = []
     soup = BeautifulSoup(html_fragment, "lxml")
@@ -46,12 +54,13 @@ def _bs_tables(html_fragment: str) -> list[dict]:
         rows = []
         for tr in tbl.find_all("tr"):
             cells = tr.find_all(["th", "td"])
-            rows.append([clean(c.get_text(" ")) for c in cells])
+            rows.append([sanitize_text(c.get_text(" ")) for c in cells])
+
         if any(any(c for c in r) for r in rows):
             cap = tbl.find("caption")
             out.append({
                 "index": i,
-                "caption": clean(cap.get_text()) if cap else None,
+                "caption": sanitize_text(cap.get_text()) if cap else None,
                 "rows": rows,
             })
     return out
@@ -90,7 +99,7 @@ def collect_links(soup: BeautifulSoup) -> list[dict]:
     # 2. 모든 덩어리에서 링크 추출
     for snp in chunks:
         for el in snp.select("a, button"):
-            text = clean(el.get_text(" ", strip=True))
+            text = sanitize_text(el.get_text(" ", strip=True))
             href = (el.get("href") or "").strip()
             if text:
                 out.append({
@@ -109,17 +118,12 @@ def collect_links(soup: BeautifulSoup) -> list[dict]:
 def collect_paragraphs(soup: BeautifulSoup) -> list[str]:
     paras: list[str] = []
     for tag in soup.find_all(["p", "li", "div", "td", "th", "a", "span", "b", "strong"]):
-        t = clean(tag.get_text(" ", strip=True))
+        t = sanitize_text(tag.get_text(" ", strip=True))
         if t: paras.append(t)
 
     for ta in soup.select('textarea[id^="contents_text_"]'):
         raw_val = ta.get_text(strip=True)
-        # [방어 로직] 만약 텍스트 안에 HTML 태그가 숨어있다면? (리눅스용 필터)
-        if "<html" in raw_val.lower() or "<p" in raw_val.lower():
-            # 태그를 떼어내기 위해 한 번 더 파싱 (윈도우에선 이 조건이 안 걸릴 확률이 높음)
-            raw_val = BeautifulSoup(raw_val, "lxml").get_text(" ", strip=True)
-        
-        txt = clean(raw_val)
+        txt = sanitize_text(ta.get_text(strip=True))
         if txt: paras.append(txt)
 
     # dedupe
@@ -204,10 +208,14 @@ def _title_to_label(ttl: str) -> str | None:
 def _heading_text_candidate(node) -> str | None:
     if not getattr(node, "name", None): return None
     cls = " ".join(node.get("class", []))
+
+    hit = None
     if node.name in ("strong", "b", "h3", "h4") or "contTit1" in cls:
-        return clean(node.get_text())
-    hit = node.find(["strong", "b", "h3", "h4"]) or node.find(class_="contTit1")
-    return clean(hit.get_text()) if hit else None
+        hit = node
+    else:
+        hit = node.find(["strong", "b", "h3", "h4"]) or node.find(class_="contTit1")
+
+    return sanitize_text(hit.get_text()) if hit else None
 
 def _nearest_heading_label(el) -> str | None:
     p, cur = el.parent, el
@@ -417,14 +425,16 @@ def parse_exam_info_file(html_path: Path) -> dict:
         for i in sorted(idx_to_label):
             lab = idx_to_label[i]
             ta = soup.select_one(f"#contents_text_{i}")
-            txt = clean(ta.get_text("\n", strip=True)) if ta else ""
+            # [수정] ta.get_text() 결과에 sanitize_text 적용
+            raw_txt = ta.get_text("\n", strip=True) if ta else ""
+            txt = sanitize_text(raw_txt)
             if txt: paras.append(f"{lab}: {txt}")
     else:
         default_map = {0: "출제경향", 1: "취득방법", 2: "출제기준"}
         for i, lab in default_map.items():
             ta = soup.select_one(f"#contents_text_{i}")
             if not ta: continue
-            txt = clean(ta.get_text("\n", strip=True))
+            txt = sanitize_text(ta.get_text("\n", strip=True))
             if txt: paras.append(f"{lab}: {txt}")
 
     have = {p.split(":", 1)[0] for p in paras if ":" in p}
@@ -437,7 +447,7 @@ def parse_exam_info_file(html_path: Path) -> dict:
             for sib in h.next_siblings:
                 if getattr(sib, "name", None):
                     if "contTit1" in " ".join(sib.get("class", [])): break
-                    t = clean(sib.get_text(" ", strip=True))
+                    t = sanitize_text(sib.get_text(" ", strip=True))
                     if t: buf.append(t)
             if buf: paras.append(f"{label}: " + " ".join(buf))
 
