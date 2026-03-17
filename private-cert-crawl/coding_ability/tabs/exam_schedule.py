@@ -3,11 +3,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from html import unescape
+from engine_common.utils_text import sanitize_text
 import time
 
 
 def _txt(el):
-    return unescape(el.get_text(separator="\n", strip=True)) if el else ""
+    return unescape(sanitize_text(el.get_text())) if el else ""
 
 def _consume_row(row, cols, prev, left):
     out = {}
@@ -48,7 +49,7 @@ def get_data(driver):
     except Exception as e:
         return {"exam_schedule": f"❌ 코딩활용능력 탭 클릭 또는 표 로딩 실패: {str(e)}"}
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
     tables = soup.find_all("table")
     if len(tables) < 2:
         return {"exam_schedule": "❌ 테이블 수 부족"}
@@ -88,7 +89,7 @@ def get_data(driver):
     if tbody2:
         for tr in tbody2.find_all("tr"):
             cells = tr.find_all(["th", "td"])
-            texts = [c.get_text(strip=True) for c in cells]
+            texts = [sanitize_text(c.get_text()) for c in cells]
 
             if not texts:
                 continue

@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, StaleElementReferenceException
+from engine_common.utils_text import sanitize_text
 
 TABLE_SEL = "table.table1"
 
@@ -52,7 +53,7 @@ def get_exam_scope_table_html(driver, timeout=15) -> str:
 
 # ---------- tiny text utils ----------
 _clean = lambda s: re.sub(r"[ \t\r\f\v]+"," ", unescape((s or "").replace("\xa0"," "))).replace("“","").replace("”","").strip()
-def _txt(el): return _clean(el.get_text(separator="\n", strip=True)) if el else ""
+def _txt(el): return _clean(sanitize_text(el.get_text())) if el else ""
 def _split(text): return [p.strip() for p in re.split(r"\n+", _clean(text)) if p.strip()]
 
 def _parse_subject(s:str)->Tuple[Optional[str],Optional[int]]:
@@ -115,7 +116,7 @@ def _header_indexes(table)->dict:
 
 # ---------- parse ----------
 def parse_exam_scope_table_html(table_html:str)->List[Dict[str,Any]]:
-    soup = BeautifulSoup(table_html, "html.parser")
+    soup = BeautifulSoup(table_html, "lxml")
     table = soup.find("table");  grid, cellmap = _grid(table);  col = _header_indexes(table)
     out=[]
     for r in range(len(grid)):

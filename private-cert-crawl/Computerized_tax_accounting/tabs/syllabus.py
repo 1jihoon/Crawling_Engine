@@ -3,6 +3,7 @@ from html import unescape
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 from bs4 import BeautifulSoup
 
 def get_exam_scope_table_html(driver):
@@ -20,7 +21,7 @@ def get_exam_scope_table_html(driver):
 
 def _txt(el):
     if not el: return ""
-    s = unescape(el.get_text(separator="\n", strip=True))
+    s = unescape(sanitize_text(el.get_text()))
     return re.sub(r"[ \t\r\f\v]+", " ", s.replace("\xa0"," ")).strip()
 
 def _visible_cells(row):
@@ -57,7 +58,7 @@ def _split_item_and_grade(text: str):
     return (f"{m.group(1)}{m.group(2)}", m.group(3)) if m else (None, None)
 
 def parse_exam_scope_table_html(table_html: str):
-    soup = BeautifulSoup(table_html, "html.parser")
+    soup = BeautifulSoup(table_html, "lxml")
     table = soup.find("table")
     # 이 표는 실제로 5열입니다.
     cols = ["종목", "등급", "구분", "평가범위", "비고"]

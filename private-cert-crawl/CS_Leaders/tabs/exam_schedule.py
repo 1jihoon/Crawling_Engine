@@ -5,9 +5,10 @@ import os, re, json, time
 from bs4 import BeautifulSoup
 from html import unescape
 from typing import Optional, List, Dict
+from engine_common.utils_text import sanitize_text
 
 # ── tiny helpers ──
-_txt = lambda el: re.sub(r"\s+", " ", unescape((el.get_text(" ", strip=True) if el else "")).replace("\xa0", " ")).strip()
+_txt = lambda el: re.sub(r"\s+", " ", unescape(sanitize_text(el.get_text()) if el else "").replace("\xa0", " ")).strip()
 
 ROUND_RE = re.compile(r"^제\s*\d{1,3}\s*-\s*\d{1,2}\s*회$")
 RANGE_RE = re.compile(r"\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일\s*~\s*\d{4}\s*년\s*\d{1,2}\s*월\s*\d{1,2}\s*일$")
@@ -51,7 +52,7 @@ def _find_table_for_schedule(soup: BeautifulSoup):
 
 # ── core ──
 def parse_exam_schedule_html(html: str) -> Dict[str, List[Dict]]:
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
     table = _find_table_for_schedule(soup)
     if not table: return {"시험일정": {"정기검정일정": []}}
 
@@ -102,7 +103,7 @@ def get_data(driver, debug_dir=None):
     if debug_dir and not data["시험일정"]["정기검정일정"]:
         os.makedirs(debug_dir, exist_ok=True)
         with open(os.path.join(debug_dir, "page.html"), "w", encoding="utf-8") as f: f.write(html)
-        tbl = _find_table_for_schedule(BeautifulSoup(html, "html.parser"))
+        tbl = _find_table_for_schedule(BeautifulSoup(html, "lxml"))
         if tbl:
             with open(os.path.join(debug_dir, "table.html"), "w", encoding="utf-8") as f: f.write(str(tbl))
     return data

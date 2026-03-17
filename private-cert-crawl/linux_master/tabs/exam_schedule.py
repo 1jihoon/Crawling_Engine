@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+from engine_common.utils_text import sanitize_text
 import time
 
 def get_data(driver):
@@ -22,7 +23,7 @@ def get_data(driver):
     except Exception as e:
         return {"exam_schedule": f"❌ 리눅스마스터 탭 클릭 또는 표 로딩 실패: {str(e)}"}
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
     tables = soup.find_all("table")
     if len(tables) < 2:
         return {"exam_schedule": "❌ 테이블 수 부족"}
@@ -37,7 +38,7 @@ def get_data(driver):
 
     for tr in rows:
         tds = tr.find_all("td")
-        texts = [td.get_text(strip=True) for td in tds]
+        texts = [sanitize_text(td.get_text()) for td in tds]
 
         if not texts:
             continue

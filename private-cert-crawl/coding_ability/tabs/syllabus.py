@@ -5,13 +5,14 @@ from urllib.parse import urljoin
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 BASE = "https://www.ihd.or.kr"
 
 # --- helpers ---
 def _txt_and_imgs(cell):
     # 텍스트 + 이미지 src
-    txt = cell.get_text(separator="\n", strip=True)
+    txt = sanitize_text(cell.get_text())
     imgs = [urljoin(BASE, img.get("src", "")) for img in cell.find_all("img")]
     #imgs = [img.get("src", "") for img in cell.find_all("img")]
     # 텍스트가 없고 이미지만 있으면 표시 텍스트를 만들어 준다
@@ -21,7 +22,7 @@ def _txt_and_imgs(cell):
 
 def _txt(cell):
     # 텍스트만 필요할 때
-    return cell.get_text(separator="\n", strip=True)
+    return sanitize_text(cell.get_text())
 
 def _consume_row(row, cols, prev, left, collect_content_imgs=False):
     """
@@ -130,6 +131,6 @@ def get_data(driver):
     except Exception as e:
         return {"시험내용": {"syllabus": [], "error": f"탭 클릭 실패: {e}"}}
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
     syllabus = parse_syllabus_from_criteria_section(soup)
     return {"시험내용": {"syllabus": syllabus}}

@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import  sanitize_text
 
 def _get_int(v, default=1):
     try:
@@ -31,7 +32,7 @@ def get_data(driver):
     except Exception as e:
         return {"시험일정": {"error": f"디지털활용능력 탭/표 로딩 실패: {e}"}}
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
 
     # ─────────────────────────────────────────────────────────
     # 1) 정기검정 일정
@@ -65,7 +66,7 @@ def get_data(driver):
             # 같은 행 안에 종목/등급 셀이 함께 올 수도 있으니 순차 체크
             # 종목
             if idx < len(cells):
-                txt = cells[idx].get_text(strip=True)
+                txt = sanitize_text(cells[idx].get_text())
                 if "디지털" in txt and "능력" in txt:  # 종목 텍스트 힌트
                     rs = _get_int(cells[idx].get("rowspan", 1))
                     tracker["subject"] = {"value": txt, "left": rs}
@@ -73,7 +74,7 @@ def get_data(driver):
 
             # 등급
             if idx < len(cells):
-                txt = cells[idx].get_text(strip=True)
+                txt = sanitize_text(cells[idx].get_text())
                 # '초급/중급/고급' or '초급' 등
                 if "급" in txt:
                     rs = _get_int(cells[idx].get("rowspan", 1))
@@ -91,10 +92,10 @@ def get_data(driver):
                 continue
 
             # 여기부터 데이터 열: 회차, 접수일자, 시험일자, 합격자 발표
-            round_text = cells[idx].get_text(strip=True); idx += 1
-            apply_text = cells[idx].get_text(strip=True); idx += 1
-            exam_text  = cells[idx].get_text(strip=True); idx += 1
-            result_text = cells[idx].get_text(strip=True) if idx < len(cells) else ""
+            round_text = sanitize_text(cells[idx].get_text()); idx += 1
+            apply_text = sanitize_text(cells[idx].get_text()); idx += 1
+            exam_text  = sanitize_text(cells[idx].get_text()); idx += 1
+            result_text = sanitize_text(cells[idx].get_text()) if idx < len(cells) else ""
 
             subject = tracker["subject"]["value"]
             grade   = tracker["grade"]["value"]
@@ -129,7 +130,7 @@ def get_data(driver):
     time_data = []
     if table2:
         for tr in table2.select("tbody tr"):
-            cols = [c.get_text(strip=True) for c in tr.find_all(["th", "td"])]
+            cols = [sanitize_text(c.get_text()) for c in tr.find_all(["th", "td"])]
             if len(cols) < 3:
                 continue
             time_data.append({

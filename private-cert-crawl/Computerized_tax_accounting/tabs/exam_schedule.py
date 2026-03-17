@@ -4,13 +4,14 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 # ───────────────────────── helpers ─────────────────────────
 def _txt(el):
     """텍스트 추출 + 엔티티 복원 + 공백 정리"""
     if not el:
         return ""
-    s = unescape(el.get_text(separator="\n", strip=True))
+    s = unescape(sanitize_text(el.get_text()))
     # 줄바꿈/연속 공백을 한 칸으로
     s = re.sub(r"[ \t\r\f\v]+", " ", s.replace("\xa0", " ")).strip()
     return s
@@ -213,7 +214,7 @@ def get_data(driver):
     except Exception:
         pass
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
 
     regular = parse_regular_schedule(soup)
     exam_time = parse_exam_time_table(soup)

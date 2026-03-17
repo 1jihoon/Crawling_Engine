@@ -4,13 +4,14 @@ from html import unescape
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 URL = "https://license.kpc.or.kr/nasec/qlfint/qlfint/selectErpinfomg.do"
 
 def _txt(el):
-    s = unescape(el.get_text("", strip=True) if el else "")
+    s = unescape(sanitize_text(el.get_text("")) if el else "")
     return re.sub(r"\s+"," ", s.replace("\xa0", " " ).strip())
-#BeautifulSoup의 메서드인 el.get_text("", strip=True)로 td의 내용 텍스트를 뽑고 앞 뒤 공백 제거하고 unescape로 특수문자 제거
+#BeautifulSoup의 메서드인 sanitize_text(el.get_text(""))로 td의 내용 텍스트를 뽑고 앞 뒤 공백 제거하고 unescape로 특수문자 제거
 #정규식으로 연속된 모든 공백 문자 \s+를 단일 공백으로 치환함 ex) "안녕 세계\n텍스트" -> "안녕 세계 텍스트"
 
 ROUND_IN_TITLE_RE = re.compile(r"제\s*(\d+)\s*회")
@@ -38,7 +39,7 @@ def _looks_time_header(th_texts:list[str]) -> bool:
 #튜플을 써서 하나의 조건 그룹을 만들고, 불변의 값이라는 걸 알려주기 위해서이다. any로 바꿔서 조건을 좀 더 유연하게 한다.(입실시간, 입실완료시간) -> 얘네 때문이다.
 
 def parse_gtq_exam_times_html(page_html:str) -> list[dict]:
-    soup = BeautifulSoup(page_html, "html.parser")
+    soup = BeautifulSoup(page_html, "lxml")
 
     cand_tables=[]
     for h in soup.find_all(["h3","h4"]):
@@ -134,7 +135,7 @@ def _get_table(soup:BeautifulSoup):
 
 
 def parse_gtq_schedule_html(html:str):
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "lxml")
     table = _get_table(soup)
     if not table:
         return {"시험일정": {"정기검정일정": []}}

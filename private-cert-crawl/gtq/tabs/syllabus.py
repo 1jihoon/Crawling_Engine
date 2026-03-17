@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 URL = "https://license.kpc.or.kr/nasec/qlfint/qlfint/selectGtqinfomg.do"
 
@@ -15,7 +16,7 @@ def _clean(s: str) -> str:
     return re.sub(r"[ \t\r\f\v]+", " ", unescape((s or "").replace("\xa0"," "))).strip()
 
 def _txt(el) -> str:
-    return _clean(el.get_text(separator=" ", strip=True)) if el else ""
+    return _clean(sanitize_text(el.get_text(separator=" "))) if el else ""
 
 def _join_lines(el) -> str:
     return " ".join([t.strip() for t in el.stripped_strings]) if el else ""
@@ -67,7 +68,7 @@ def _header_labels(table) -> List[str]:
 
 
 def _parse_gtq_subject_table(table_html: str) -> List[Dict[str,Any]]:
-    soup = BeautifulSoup(table_html, "html.parser")
+    soup = BeautifulSoup(table_html, "lxml")
     table = soup.find("table")
     grid, cellmap = _grid(table)
 

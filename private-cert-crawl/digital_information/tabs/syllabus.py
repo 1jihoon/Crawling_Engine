@@ -2,6 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
+from engine_common.utils_text import sanitize_text
 import time
 
 def get_data(driver):
@@ -32,7 +33,7 @@ def get_data(driver):
 
         print("✅ 출제가이드 테이블 추출 성공")
 
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, "lxml")
         table = soup.find("table")
         if not table:
             return {"syllabus": "출제가이드 테이블 파싱 실패"}
@@ -44,7 +45,7 @@ def get_data(driver):
         current_detail = None
 
         for row in table.select("tbody tr"):
-            cells = [td.get_text(strip=True) for td in row.find_all(["th", "td"])]
+            cells = [sanitize_text(td.get_text()) for td in row.find_all(["th", "td"])]
             if not cells:
                 continue
 

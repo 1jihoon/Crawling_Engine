@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 # 바리스타 사이트 기준
 BASE = "https://www.kca-coffee.org"
@@ -18,11 +19,11 @@ def _norm(s: str) -> str:
     return s.strip()
 
 def _txt(el):
-    return _norm(el.get_text(separator="\n", strip=True)) if el else ""
+    return _norm(sanitize_text(el.get_text(separator="\n"))) if el else ""
 
 def _bullets(cell):
     """<ul><li>…</li></ul>은 리스트로만 수집"""
-    items = [_norm(li.get_text(" ", strip=True)) for li in cell.select("li")]
+    items = [_norm(sanitize_text(li.get_text(" "))) for li in cell.select("li")]
     if not items:
         t = _txt(cell)
         if t:
@@ -110,6 +111,6 @@ def get_data(driver):
     except Exception:
         pass
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
     syllabus = parse_exam_content_table(soup)
     return {"시험내용": {"syllabus": syllabus}}

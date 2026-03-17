@@ -1,7 +1,27 @@
 import re
+from bs4 import BeautifulSoup
 
 def _clean(s: str | None) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
+
+def sanitize_text(txt: str) -> str:
+    """
+    텍스트 내부에 HTML 태그가 잔존할 경우 제거 (lxml 파서 활용)
+    리눅스 환경에서의 데이터 오염을 원천 차단합니다.
+    """
+    if not txt: 
+        return ""
+    
+    # <p, <br, <span 등 태그 기호가 보인다면 한 번 더 파싱하여 텍스트만 추출
+    if "<" in txt and ">" in txt:
+        try:
+            # lxml을 사용하여 가장 강력하게 정화
+            txt = BeautifulSoup(txt, "lxml").get_text(" ", strip=True)
+        except Exception:
+            # 혹시 모를 에러 발생 시 기본 bs4 파서로 fallback
+            txt = BeautifulSoup(txt, "lxml").get_text(" ", strip=True)
+            
+    return _clean(txt)
 
 def _as_list(x):
     if x is None: return []

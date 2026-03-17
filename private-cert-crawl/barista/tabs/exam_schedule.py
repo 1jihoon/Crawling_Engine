@@ -5,12 +5,13 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 # ───────────── helpers ─────────────
 def _txt(el):
     if not el:
         return ""
-    s = unescape(el.get_text(separator="\n", strip=True)).replace("\xa0", " ")
+    s = unescape(sanitize_text(el.get_text(separator="\n"))).replace("\xa0", " ")
     # 공백 정리
     return re.sub(r"[ \t\r\f\v]+", " ", s).strip()
 
@@ -121,7 +122,7 @@ def get_barista_grade_schedule(driver, grade: str):
     except Exception:
         pass
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(driver.page_source, "lxml")
     return parse_barista_schedule_table(soup, grade)
 
 def get_data(driver):

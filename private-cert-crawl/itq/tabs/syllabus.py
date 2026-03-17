@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from engine_common.utils_text import sanitize_text
 
 URL = "https://license.kpc.or.kr/nasec/qlfint/qlfint/selectItqinfotchnlgyqc.do"
 
@@ -15,7 +16,7 @@ def _clean(s: str) -> str:
     return re.sub(r"[ \t\r\f\v]+", " ", unescape((s or "").replace("\xa0"," "))).strip()
 
 def _txt(el) -> str:
-    return _clean(el.get_text(separator=" ", strip=True)) if el else ""
+    return _clean(sanitize_text(el.get_text(separator=" "))) if el else ""
 
 # ───────────── grid (rowspan/colspan aware) ─────────────
 def _visible(tr):
@@ -56,7 +57,7 @@ def _grid(table):
 #cellmap을 써서 좌표로 바로 셀에 접근할 수 있게 한다. ex) cellmap[0][1] -> 무엇무엇 이렇게
 
 def _parse_itq_subject_table(table_html: str) -> List[Dict[str, Any]]:
-    soup = BeautifulSoup(table_html, "html.parser")
+    soup = BeautifulSoup(table_html, "lxml")
     table = soup.find("table")
     if not table:
         return []
