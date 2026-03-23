@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  private-engine:
+    build: .
+    container_name: cert-engine-private
+    volumes:
+      - .:/app:Z
+      - ./private-cert-crawl/configs:/app/configs:Z
+    env_file:
+      - .env
+    command: python run_once.py 
+
+  public-engine:
+    build: .
+    container_name: cert-engine-public
+    volumes:
+      - .:/app:Z
+      - ../cert_data:/cert_data:Z 
+    env_file:
+      - .env
+    command: python public_cert_api/run_public.py
