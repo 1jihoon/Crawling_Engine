@@ -4,6 +4,7 @@ services:
   private-engine:
     build: .
     container_name: cert-engine-private
+    shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     volumes:
       - .:/app:Z
       - ./private-cert-crawl/configs:/app/configs:Z
@@ -14,6 +15,7 @@ services:
   public-engine:
     build: .
     container_name: cert-engine-public
+    shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     volumes:
       - .:/app:Z
       - ../cert_data:/cert_data:Z 

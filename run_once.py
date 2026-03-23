@@ -22,6 +22,7 @@ def _make_driver(headless: bool = True):
     """Selenium Chrome WebDriver 생성 (동적 렌더링 필요 시 사용)."""
     opts = Options()
     opts.add_argument("--headless=new")  # 필요시 활성화
+    opts.add_argument("--disable-dev-shm-usage")  # 대용량 페이지 충돌 방지
     opts.add_argument("--no-sandbox")
     opts.add_argument("--disable-gpu")
     opts.add_argument("--window-size=1280,2000")
