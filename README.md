@@ -5,6 +5,12 @@
 
 Pipeline: fetch → parse → normalize → output(JSON)
 
+## 👨‍💻 Core Contributions (기여도)
+- **Lead Developer ([Lee_Jihoon])**: 
+    - 프로젝트 전체 아키텍처 설계 및 핵심 크롤링 엔진 로직 구현 (전체 코드의 95% 이상 담당)
+    - 600개 이상의 자격증 사이트 대응을 위한 다중 규칙 엔진 개발
+    - Docker 기반 통합 인프라 및 운영 환경 구축 (PostgreSQL, Selenium Grid 최적화)
+
 > [!IMPORTANT]
 > ### 📢 Notice: Intellectual Property Protection (Patent Pending)
 > * 본 프로젝트에 적용된 **'비정형 데이터 대응 다중 규칙 엔진'** 로직은 현재 **특허 출원 절차를 진행 중**에 있습니다.
