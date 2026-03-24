@@ -136,15 +136,21 @@ flowchart LR
 **"단순한 크롤링을 넘어, 공공과 민간의 데이터 파이프라인을 하나의 정제 표준으로 통합함으로써 시스템의 확장성과 데이터 신뢰성을 동시에 확보했습니다."**
 
 
-## 5. 멀티 플랫폼 지원 (Cross-platform Support) 
+## 5. Docker 기반 통합 인프라 및 멀티 플랫폼 지원
 
-본 프로젝트는 개발 환경(Windows)과 운영 환경(Linux) 모두에서 동일하게 작동하도록 설계되었습니다. [cite: 2026-03-04]
+본 프로젝트는 단순한 코드 구현을 넘어, **'어떤 환경에서도 즉시 배포 및 실행 가능한 엔진'**을 구축하기 위해 Docker 기반의 통합 인프라를 도입했습니다. 이를 통해 Windows와 Linux 사이의 환경 의존성 문제를 완벽히 해결했습니다. 
 
 | 항목 | 상세 내용 |
 | :--- | :--- |
-| **지원 OS** | Windows 10/11, Fedora Linux (Server) [cite: 2026-03-03, 2026-03-04] |
-| **의존성 최적화** | `psycopg2-binary==2.9.11` 적용으로 OS별 라이브러리 충돌 해결 |
-| **검증 완료** | 공공(Q-Net) 및 민간(KAIT) 자격증 데이터 정규화 테스트 통과 [cite: 2026-03-04] |
+| **지원 OS** | Windows 10/11 (Docker Desktop), Fedora Linux (Docker Engine) |
+| **인프라 표준화** | Docker Image를 통한 라이브러리 파편화 및 `psycopg2-binary==2.9.11` 적용으로 OS별 라이브러리 충돌 해결 |
+| **리소스 최적화** | Shared Memory (2GB) 할당으로 대용량 자격증 페이지 수집 안정성 확보 |
+| **구조적 유연성** | Host Volume Binding을 통해 기존 폴더 구조를 유지하며 컨테이너와 데이터 동기화 |
+| **검증 완료** | 공공(Q-Net) 및 민간(KAIT) 자격증 데이터 정규화 테스트 통과  |
+
+* **주요 엔지니어링 의사결정 (Decision & Rationale)**
+  - **설계의 일관성**: 프로젝트의 기존 폴더 및 파일 구조를 강제로 변경하지 않고, docker-compose.yml의 볼륨 매핑 기능을 정교하게 설계하여 호스트의 소스를 컨테이너 내부 경로로 직접 연결했습니다. 이는 개발 생산성을 유지하면서도 운영 환경의 독립성을 확보한 핵심 전략입니다.
+  - **환경의 제약 극복**: 리눅스(Fedora) 환경의 엄격한 보안 정책(SELinux)을 고려하여 :Z 플래그를 도입했고, 크롬 브라우저의 고질적인 메모리 부족(Tab Crashed) 문제를 인프라 레벨(shm_size)에서 근본적으로 해결했습니다.
 
 단순히 작동하는 코드가 아니라, 어떤 운영환경(LINUX)에서도 돌아가게 만드는 엔진에 집중했습니다.
 특히 윈도우와 페도라 사이의 라이브러리 충돌(psycopg2-binary)을 해결하며, 인프라 환경에 따른 
@@ -152,7 +158,8 @@ flowchart LR
 
 ---
 
-> **"이 프로젝트는 AI라는 강력한 도구를 빌려 시작했지만, 그 핸들을 잡고 목적지(Linux 서버 배포)까지 도달한 것은 저의 의지였습니다. 코드 한 줄의 깔끔함보다, 장애 상황에서 '왜?'라고 묻고 해결책을 찾아가는 과정을 더 중요하게 생각하며 개발했습니다."**
+> **이 프로젝트는 단순히 데이터를 긁어오는 도구가 아닙니다. 윈도우에서 개발하고 리눅스 서버에 배포하는 실제 현업의 파이프라인을 Docker로 표준화하여, **'명령어 단 한 줄'**로 모든 가동이 가능하게 만든 엔지니어링의 결과물입니다."**
+
 
 ## 6. Linux 환경 설정 가이드 (Environment Setup)
 
@@ -175,14 +182,34 @@ flowchart LR
    source .venv/bin/activate
    ```
 
-4. **엔진 실행 (공공 자격증)**
+4. **도커 설치(Linux 기준)**
    ```bash
-   python -m public_cert_api.run_public --root "$HOME/cert_data" --jmcd 1320 --mode http
+   # 1. Docker 및 Docker Compose 설치
+   sudo dnf install -y docker docker-compose
+
+   # 2. Docker 서비스 시작 및 부팅 시 자동 실행 설정
+   sudo systemctl start docker
+   sudo systemctl enable docker
+
+   # 3. (선택) sudo 없이 도커 사용을 위한 사용자 그룹 추가
+   sudo usermod -aG docker $USER
+   # 이후 로그아웃 후 다시 로그인해야 적용됩니다.
    ```
 
-5. **엔진 실행(민간 자격증)**
+5. **엔진 빌드 (최초 1회 또는 코드 수정 시)**
    ```bash
-   python run_once.py --cert linux_master --config private-cert-crawl/configs/cert_map.yaml
+   docker compose build
+   ```
+
+5. **엔진 실행 (공공 자격증)**
+   ```bash
+   # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
+   docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
+   ```
+
+6. **엔진 실행(민간 자격증)**
+   ```bash
+   docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
 
 ## 6-2. Window  환경 설정 가이드 (Environment Setup)
@@ -206,12 +233,18 @@ flowchart LR
    .\.venv\Scripts\activate
    ```
 
-4. **엔진 실행 (공공 자격증)**
+4. **Windows 환경**
+   - **Docker Desktop 설치**: Docker 공식 홈페이지에서 설치 파일을 다운로드하여 설치합니다.
+   - **가상화 설정**: BIOS에서 Virtualization(VT-x/AMD-V)이 활성화되어 있어야 하며, WSL2 기반 설정을 권장합니다.
+   - **실행 확인**: 터미널에서 명령어를 입력하기 전, 반드시 Docker Desktop 앱을 실행하여 'Engine Running' 상태인지 확인해야 합니다.
+
+5. **엔진 실행 (공공 자격증)**
    ```bash
-   python -m public_cert_api.run_public --root "C:\cert_data" --jmcd 1320 --mode http
+   # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
+   docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
 5. **엔진 실행(민간 자격증)**
    ```bash
-   python run_once.py --cert linux_master --config private-cert-crawl/configs/cert_map.yaml
+   docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
