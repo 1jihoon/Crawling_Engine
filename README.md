@@ -197,10 +197,11 @@ flowchart LR
      ```bash
      python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
      ```
+     
 3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
      ```bash
-     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
      #예를 들어 자격증 이름 = linux_master
+     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
      ```
 
 4. **도커 설치(Linux 기준)**
@@ -222,13 +223,13 @@ flowchart LR
    docker compose build
    ```
 
-5. **엔진 실행 (도커에서 공공 자격증 추출)**
+6. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
    # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
    docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
-6. **엔진 실행(도커에서 민간 자격증 추출)**
+7. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
    docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
@@ -251,10 +252,12 @@ flowchart LR
    ```bash
    .\.venv\Scripts\activate
    ```
+   
 3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
      ```bash
      python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
      ```
+     
 3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
      ```bash
      python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
@@ -272,7 +275,7 @@ flowchart LR
    docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
-5. **엔진 실행(도커에서 민간 자격증 추출)**
+6. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
    docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
