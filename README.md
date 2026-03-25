@@ -193,16 +193,16 @@ flowchart LR
    source .venv/bin/activate
    ```
 
-3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
-     ```bash
-     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
-     ```
+   3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+        ```bash
+        python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
+        ```
      
-3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
-     ```bash
-     #예를 들어 자격증 이름 = linux_master
-     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
-     ```
+   3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**
+        ```bash
+        #예를 들어 자격증 이름 = linux_master
+        python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+        ```
 
 4. **도커 설치(Linux 기준)**
    ```bash
@@ -253,29 +253,29 @@ flowchart LR
    .\.venv\Scripts\activate
    ```
    
-3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
-     ```bash
-     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
-     ```
+   3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+        ```bash
+        python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
+        ```
      
-3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
-     ```bash
-     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
-     #예를 들어 자격증 이름 = linux_master
-     ```
+   3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
+        ```bash
+        #예를 들어 자격증 이름 = linux_master
+        python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+        ```
 
-4. **Windows 환경**
+5. **Windows 환경**
    - **Docker Desktop 설치**: Docker 공식 홈페이지에서 설치 파일을 다운로드하여 설치합니다.
    - **가상화 설정**: BIOS에서 Virtualization(VT-x/AMD-V)이 활성화되어 있어야 하며, WSL2 기반 설정을 권장합니다.
    - **실행 확인**: 터미널에서 명령어를 입력하기 전, 반드시 Docker Desktop 앱을 실행하여 'Engine Running' 상태인지 확인해야 합니다.
 
-5. **엔진 실행 (도커에서 공공 자격증 추출)**
+6. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
    # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
    docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
-6. **엔진 실행(도커에서 민간 자격증 추출)**
+7. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
    docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
