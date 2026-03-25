@@ -194,11 +194,13 @@ flowchart LR
    ```
 
 3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+
     ```bash
     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
     ```
      
 3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**
+
     ```bash
     #예를 들어 자격증 이름 = linux_master
     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
@@ -254,11 +256,13 @@ flowchart LR
    ```
    
 3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+
     ```bash
     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
     ```
      
 3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**
+
     ```bash
     #예를 들어 자격증 이름 = linux_master
     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
