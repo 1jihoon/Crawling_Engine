@@ -167,7 +167,12 @@ flowchart LR
 > **이 프로젝트는 단순히 데이터를 긁어오는 도구가 아닙니다. 윈도우에서 개발하고 리눅스 서버에 배포하는 실제 현업의 파이프라인을 Docker로 표준화하여, **'명령어 단 한 줄'**로 모든 가동이 가능하게 만든 엔지니어링의 결과물입니다."**
 
 
-## 6. Linux 환경 설정 가이드 (Environment Setup)
+## 6. 환경 설정 가이드 (Environment Setup)
+
+본 프로젝트는 원활한 개발 및 운영을 위해 두 가지 실행 환경을 제공합니다. 
+
+* **Option 1 (가상환경):** 코드 수정 및 로컬 테스트 등 **개발 단계**에서 빠른 피드백을 위해 사용합니다.
+* **Option 2 (Docker):** 실제 운영 환경과 동일한 조건에서 **엔진을 시연하거나 배포**할 때 사용하며, 환경 의존성 없이 즉시 실행 가능합니다. (권장)
 
 ## 1. Linux (Fedora 기준)
 1. **시스템 패키지 설치**
@@ -188,6 +193,16 @@ flowchart LR
    source .venv/bin/activate
    ```
 
+3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+     ```bash
+     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
+     ```
+3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
+     ```bash
+     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+     #예를 들어 자격증 이름 = linux_master
+     ```
+
 4. **도커 설치(Linux 기준)**
    ```bash
    # 1. Docker 및 Docker Compose 설치
@@ -207,18 +222,16 @@ flowchart LR
    docker compose build
    ```
 
-5. **엔진 실행 (공공 자격증)**
+5. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
    # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
    docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
-6. **엔진 실행(민간 자격증)**
+6. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
    docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
-
-## 6-2. Window  환경 설정 가이드 (Environment Setup)
 
 ## 1. Windows
 1. **Python 설치**
@@ -238,19 +251,28 @@ flowchart LR
    ```bash
    .\.venv\Scripts\activate
    ```
+3-1. **엔진 실행(가상환경에서 공공 자격증 추출)**
+     ```bash
+     python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
+     ```
+3-2. **엔진 실행(가상환경에서 민간 자격증 추출)**     
+     ```bash
+     python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+     #예를 들어 자격증 이름 = linux_master
+     ```
 
 4. **Windows 환경**
    - **Docker Desktop 설치**: Docker 공식 홈페이지에서 설치 파일을 다운로드하여 설치합니다.
    - **가상화 설정**: BIOS에서 Virtualization(VT-x/AMD-V)이 활성화되어 있어야 하며, WSL2 기반 설정을 권장합니다.
    - **실행 확인**: 터미널에서 명령어를 입력하기 전, 반드시 Docker Desktop 앱을 실행하여 'Engine Running' 상태인지 확인해야 합니다.
 
-5. **엔진 실행 (공공 자격증)**
+5. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
    # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
    docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
    ```
 
-5. **엔진 실행(민간 자격증)**
+5. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
    docker compose run --rm private-engine python -m run_once --cert [자격증이름]
    ```
