@@ -10,6 +10,15 @@ import csv
 import os
 import re
 
+from prometheus_client import start_http_server, Counter, Gauge
+import time
+
+# 1. 수집할 데이터(Metrics) 정의
+# 성공 횟수 기록 (계속 올라가는 숫자)
+CRAWL_SUCCESS_TOTAL = Counter('crawl_success_total', 'Total number of successful crawls')
+# 현재 메모리 사용량 (오르락내리락하는 숫자)
+ENGINE_MEMORY_USAGE = Gauge('engine_memory_usage_bytes', 'Current memory usage of the engine')
+
 def _clean_jmcd(s: str) -> str | None:
     # 앞뒤 공백, 따옴표, BOM 제거
     s = (s or "").strip().lstrip("\ufeff").strip("'\"")
@@ -193,6 +202,13 @@ def main():
                 help="쿠키 적재/전송 정보 로그 출력")
     args = ap.parse_args()
 
+    # 🟢 [추가] 프로메테우스 서버 시작 (main 시작 시점에 한 번만!)
+    try:
+        start_http_server(8010)
+        print("🚀 Prometheus metrics server started on port 8010")
+    except Exception as e:
+        print(f"⚠️ Metrics server failed to start: {e}")
+
 
     idmap = load_idmap(args.csv)
 
@@ -322,6 +338,16 @@ def main():
                 print(f"[patch] set _meta.name='{args.display_name}' -> {norm_path}")
             else:
                 print(f"[warn] norm file not found for display-name: {norm_path}")
+
+        # 🟢 [추가] 모든 단계가 성공적으로 끝난 이 시점에 지표 상승!
+        CRAWL_SUCCESS_TOTAL.inc()
+        print(f"✅ [{jmcd}] 모니터링 지표 업데이트 완료")
+
+        # (선택 사항) 메모리 사용량 업데이트
+        # import psutil 등을 써서 ENGINE_MEMORY_USAGE.set(psutil.Process().memory_info().rss)
+
+        ensure_free_space(root, args.min_free_gb)
+        time.sleep(args.sleep) 
 
     print("\n[ALL DONE]")
 

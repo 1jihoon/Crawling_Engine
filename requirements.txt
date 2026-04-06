@@ -14,3 +14,6 @@ psycopg2-binary==2.9.11 ;
 SQLAlchemy>=2.0
 redis>=5
 python-dotenv
+
+# 기존 라이브러리들 아래에 추가
+prometheus_client

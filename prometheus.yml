@@ -1,0 +1,18 @@
+# 1. 전역 설정 (Global)
+global:
+  scrape_interval: 15s     # 15초마다 데이터를 수집합니다. (너무 자주 하면 서버에 부하가 가요)
+  evaluation_interval: 15s # 규칙(알람 등)을 검사하는 주기입니다.
+
+# 2. 수집 대상 설정 (Scrape Configs)
+scrape_configs:
+  # (1) 프로메테우스 자기 자신을 감시
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # (2) 지훈님의 크롤링 엔진 감시 (추후 cAdvisor나 Exporter 연결용)
+  - job_name: 'cert-engine'
+    static_configs:
+      - targets: 
+        - 'cert-engine-private:8010' # 도커 서비스 이름과 포트를 적습니다.
+        - 'cert-engine-public:8010'

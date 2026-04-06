@@ -18,6 +18,29 @@ from schemas.v1 import RootV1, MetaV1  # Engine/schemas 에 있어야 함
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
+from prometheus_client import start_http_server, Counter, Gauge
+import time
+
+# 1. 수집할 데이터(Metrics) 정의
+# 성공 횟수 기록 (계속 올라가는 숫자)
+CRAWL_SUCCESS_TOTAL = Counter('crawl_success_total', 'Total number of successful crawls')
+# 현재 메모리 사용량 (오르락내리락하는 숫자)
+ENGINE_MEMORY_USAGE = Gauge('engine_memory_usage_bytes', 'Current memory usage of the engine')
+
+if __name__ == '__main__':
+    # 2. 프로메테우스가 데이터를 읽어갈 포트(8000)를 엽니다.
+    # docker-compose에서 내부 포트를 8000으로 잡았으니 여기서도 8000이어야 합니다!
+    start_http_server(8010)
+    print("Prometheus metrics server started on port 8010")
+
+    # 기존 크롤링 로직 실행부
+    while True:
+        # 크롤링 성공 시 1씩 증가
+        CRAWL_SUCCESS_TOTAL.inc() 
+        
+        # 실제 로직 실행...
+        time.sleep(10)
+
 def _make_driver(headless: bool = True):
     """Selenium Chrome WebDriver 생성 (동적 렌더링 필요 시 사용)."""
     opts = Options()
