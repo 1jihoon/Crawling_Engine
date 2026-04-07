@@ -27,19 +27,6 @@ CRAWL_SUCCESS_TOTAL = Counter('crawl_success_total', 'Total number of successful
 # 현재 메모리 사용량 (오르락내리락하는 숫자)
 ENGINE_MEMORY_USAGE = Gauge('engine_memory_usage_bytes', 'Current memory usage of the engine')
 
-if __name__ == '__main__':
-    # 2. 프로메테우스가 데이터를 읽어갈 포트(8000)를 엽니다.
-    # docker-compose에서 내부 포트를 8000으로 잡았으니 여기서도 8000이어야 합니다!
-    start_http_server(8010)
-    print("Prometheus metrics server started on port 8010")
-
-    # 기존 크롤링 로직 실행부
-    while True:
-        # 크롤링 성공 시 1씩 증가
-        CRAWL_SUCCESS_TOTAL.inc() 
-        
-        # 실제 로직 실행...
-        time.sleep(10)
 
 def _make_driver(headless: bool = True):
     """Selenium Chrome WebDriver 생성 (동적 렌더링 필요 시 사용)."""
@@ -169,6 +156,11 @@ def run(
                 pass
         section = norm_fn(raw)      # 정규화
         root[t["target"]] = section # 대상 섹션에 삽입
+        # ✅ [성공 지표 업데이트] 탭 하나가 성공할 때마다 카운트 증가
+        CRAWL_SUCCESS_TOTAL.inc()
+
+        print(f"✔ Successfully processed {cert} - {t['name']}")
+
 
     # 최종 스키마 검증
     RootV1.model_validate(root)
@@ -248,6 +240,13 @@ def main():
     p.add_argument("--tabs", help="실행할 탭 이름들을 콤마(,)로 구분해 지정 (예: 시험일정,시험내용)")
     p.add_argument("--config", help="사용할 YAML 경로 (예: .\\private-cert-crawl\\configs\\cert_map.yaml)")
     args = p.parse_args()
+
+    try:
+        # 도커 컴포즈의 내부 포트(Right side)와 일치시켜야 함!
+        start_http_server(8010) 
+        print("🚀 Prometheus metrics server started on port 8010")
+    except Exception as e:
+        print(f"⚠️ Metrics server start failed: {e}")
 
     cfg = load_cfg(args.config)
     cert = args.cert or _infer_cert_from_cwd(cfg)

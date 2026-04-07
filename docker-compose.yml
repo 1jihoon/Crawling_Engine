@@ -12,7 +12,7 @@ services:
      # - ./private-cert-crawl/configs:/app/configs:Z
     env_file:
       - .env
-    command: python run_once.py
+    command: python run_once.py --cert ${CERT} --config ./private-cert-crawl/configs/cert_map.yaml
 
   public-engine:
     build: .
