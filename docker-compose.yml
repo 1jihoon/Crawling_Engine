@@ -7,12 +7,13 @@ services:
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     ports:
       - "8000:8010" # 밖에서 8000으로 들어오면 안의 8010으로 연결
+    working_dir: /app/private-cert-crawl  # 이 줄을 추가!
     volumes:
       - .:/app:Z
      # - ./private-cert-crawl/configs:/app/configs:Z
     env_file:
       - .env
-    command: python run_once.py --cert ${CERT} --config ./private-cert-crawl/configs/cert_map.yaml
+    command: python ../run_once.py --cert ${CERT} --config ./configs/cert_map.yaml
 
   public-engine:
     build: .
