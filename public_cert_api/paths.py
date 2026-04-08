@@ -17,7 +17,7 @@ def get_data_root() -> Path:
     return BASE_DIR / "data"
 
 DATA_DIR = get_data_root()
-RAW_DIR  = DATA_DIR / "chansol_api"
+RAW_DIR  = DATA_DIR / "raw_storage"
 LOG_DIR  = DATA_DIR / "_logs"
 ERR_DIR  = DATA_DIR / "_errors"
 

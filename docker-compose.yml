@@ -21,6 +21,7 @@ services:
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     ports:
       - "8001:8010" # 밖에서 8001으로 들어오면 안의 8010으로 연결
+    working_dir: /app/public_cert_api  # 작업실을 공공 폴더 안으로!
     volumes:
       - .:/app:Z
       - ../cert_data:/cert_data:Z 
@@ -29,7 +30,7 @@ services:
     command: python -m public_cert_api.run_public --root /cert_data --jmcd ${JMCD} --mode http
     environment:
       - PYTHONPATH=/app # 이게 핵심입니다! 이 한 줄이 있으면 -m 없이도 경로를 잘 찾습니다.
-
+      - CERT_DATA_DIR=/cert_data  # 이 줄을 추가하세요!
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
