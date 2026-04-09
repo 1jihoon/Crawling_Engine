@@ -225,14 +225,36 @@ flowchart LR
 
 8. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
-   # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
-   docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
+   JMCD=1320 docker-compose up -d public-engine
    ```
 
 9. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
-   docker compose run --rm private-engine python -m run_once --cert [자격증이름]
+   CERT=linux_master docker-compose up -d private-engine
    ```
+
+10. **전체 종목 일괄 수집**
+    ```bash
+    while read -r jmcd; do 
+         echo "▶️ 현재 수집 중인 종목 코드: $jmcd"
+         JMCD=$jmcd docker-compose up public-engine
+    done < others.txt
+    ```
+
+12. **보안 및 권한 관리**
+    ```bash
+    # 1. 소유권 변경 (현재 사용자로 지정)
+    sudo chown -R $USER:$USER ~/cert_data
+
+    # 2. 디렉토리 권한 (755): 리스트 조회 및 진입 허용
+    find ~/cert_data -type d -exec chmod 755 {} +
+
+    # 3. 파일 권한 (644): 읽기/쓰기 허용 (실행 방지)
+    find ~/cert_data -type f -exec chmod 644 {} +
+
+    # 4. SELinux 보안 라벨 (Fedora 등 특정 환경 필요 시)  
+    sudo chcon -Rt svirt_sandbox_file_t ~/cert_data
+    ```     
 
 ## 1. Windows
 1. **Python 설치**
@@ -271,11 +293,20 @@ flowchart LR
 
 7. **엔진 실행 (도커에서 공공 자격증 추출)**
    ```bash
-   # -m 옵션을 사용하여 모듈 단위로 실행하며, .py 확장자는 생략합니다.
-   docker compose run --rm public-engine python -m public_cert_api.run_public --root /cert_data --jmcd 1320 --mode http
+   $env:JMCD="1320"; docker-compose up -d public-engine
    ```
 
 8. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
-   docker compose run --rm private-engine python -m run_once --cert [자격증이름]
+   CERT=linux_master docker-compose up -d private-engine
+   ```
+
+
+9. **전체 종목 일괄 수집**
+   ```bash
+   foreach ($jmcd in Get-Content others.txt) {
+      Write-Host "▶️ 현재 수집 중인 종목 코드: $jmcd"
+      $env:JMCD = $jmcd.Trim()
+      docker-compose up public-engine
+   }
    ```
