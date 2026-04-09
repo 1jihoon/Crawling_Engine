@@ -1,4 +1,4 @@
-<img width="609" height="598" alt="image" src="https://github.com/user-attachments/assets/13f4e612-91bb-44e6-88bf-8e7664ba8ac2" /># Crawling Engine (Python)
+# Crawling Engine (Python)
 
 공공/민간 자격증 사이트의 정보를 자동 수집·정규화하여 **표준 JSON 산출물**을 생성하는 크롤링 엔진입니다.  
 운영 관점에서 **실패 제어(타임아웃/재시도/스냅샷)와 로그 기반 재현/트러블슈팅**을 우선해 설계했습니다.
