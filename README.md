@@ -1,4 +1,4 @@
-# Crawling Engine (Python)
+<img width="609" height="598" alt="image" src="https://github.com/user-attachments/assets/13f4e612-91bb-44e6-88bf-8e7664ba8ac2" /># Crawling Engine (Python)
 
 공공/민간 자격증 사이트의 정보를 자동 수집·정규화하여 **표준 JSON 산출물**을 생성하는 크롤링 엔진입니다.  
 운영 관점에서 **실패 제어(타임아웃/재시도/스냅샷)와 로그 기반 재현/트러블슈팅**을 우선해 설계했습니다.
@@ -298,11 +298,11 @@ flowchart LR
 
 8. **엔진 실행(도커에서 민간 자격증 추출)**
    ```bash
-   CERT=linux_master docker-compose up -d private-engine
+   $env:CERT="linux_master"; docker-compose up -d private-engine
    ```
 
 
-9. **전체 종목 일괄 수집**
+9. **전체 종목 일괄 수집(Windows 환경은 Docker 파일 시스템 동기화로 인해 대량 수집 시 속도가 매우 느려질 수 있으므로, 가급적 Linux 환경 사용을 권장합니다)**
    ```bash
    foreach ($jmcd in Get-Content others.txt) {
       Write-Host "▶️ 현재 수집 중인 종목 코드: $jmcd"
