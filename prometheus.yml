@@ -10,9 +10,7 @@ scrape_configs:
     static_configs:
       - targets: ['localhost:9090']
 
-  # (2) 지훈님의 크롤링 엔진 감시 (추후 cAdvisor나 Exporter 연결용)
-  - job_name: 'cert-engine'
+  - job_name: 'pushgateway'
+    honor_labels: true
     static_configs:
-      - targets: 
-        - 'cert-engine-private:8010' # 도커 서비스 이름과 포트를 적습니다.
-        - 'cert-engine-public:8010'
+      - targets: ['pushgateway:9091']

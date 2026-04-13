@@ -1,48 +1,71 @@
-version: '3.8'
-
 services:
   private-engine:
     build: .
     container_name: cert-engine-private
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
-    ports:
-      - "8000:8010" # 밖에서 8000으로 들어오면 안의 8010으로 연결
     working_dir: /app/private-cert-crawl  # 이 줄을 추가!
     volumes:
       - .:/app:Z
-     # - ./private-cert-crawl/configs:/app/configs:Z
+      - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화 추가
     env_file:
       - .env
+    environment:
+      - TZ=Asia/Seoul
     command: python ../run_once.py --cert ${CERT} --config ./configs/cert_map.yaml
 
   public-engine:
     build: .
     container_name: cert-engine-public
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
-    ports:
-      - "8001:8010" # 밖에서 8001으로 들어오면 안의 8010으로 연결
     working_dir: /app/public_cert_api  # 작업실을 공공 폴더 안으로!
     volumes:
       - .:/app:Z
-      - ../cert_data:/cert_data:Z 
+      - ../cert_data:/cert_data:Z
+      - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화 추가
     env_file:
       - .env
     command: python -m public_cert_api.run_public --root /cert_data --jmcd ${JMCD} --mode http
     environment:
       - PYTHONPATH=/app # 이게 핵심입니다! 이 한 줄이 있으면 -m 없이도 경로를 잘 찾습니다.
       - CERT_DATA_DIR=/cert_data  # 이 줄을 추가하세요!
+      - TZ=Asia/Seoul
+
+  # 1. 우체통(Pushgateway) 추가
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    ports:
+      - "127.0.0.1:9091:9091"
+    environment:
+      - TZ=Asia/Seoul
+    restart: always
+
+
+  # 🛰️ 2. 관제실(Prometheus) - 우체통에서 데이터를 수거할 곳
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:Z
-    ports:
-      - "127.0.0.1:9090:9090" # 프로메테우스 웹 UI 접속용
+      - prometheus_data:/prometheus
+      - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화
+    environment:
+      - TZ=Asia/Seoul
     restart: always
+
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
       - "127.0.0.1:3000:3000" # 그라파나 대시보드 접속용
+    volumes:
+      - grafana_data:/var/lib/grafana  # 👈 이 줄이 핵심입니다!
     restart: always
+
+# 4. 마지막 줄에 볼륨 정의 추가 (이게 핵심!)
+volumes:
+  prometheus_data:
+  grafana_data:

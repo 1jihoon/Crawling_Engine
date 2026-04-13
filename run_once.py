@@ -18,15 +18,20 @@ from schemas.v1 import RootV1, MetaV1  # Engine/schemas 에 있어야 함
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-from prometheus_client import start_http_server, Counter, Gauge
+from prometheus_client import CollectorRegistry, Counter, Gauge, push_to_gateway
 import time
+
+# 기존의 전역 변수 위치에 만드시면 됩니다.
+registry = CollectorRegistry()
 
 # 1. 수집할 데이터(Metrics) 정의
 # 성공 횟수 기록 (계속 올라가는 숫자)
-CRAWL_SUCCESS_TOTAL = Counter('crawl_success_total', 'Total number of successful crawls')
-# 현재 메모리 사용량 (오르락내리락하는 숫자)
-ENGINE_MEMORY_USAGE = Gauge('engine_memory_usage_bytes', 'Current memory usage of the engine')
-
+CRAWL_SUCCESS_TOTAL = Counter('crawl_success_total', 'Total number of successful crawls', registry=registry)
+ENGINE_MEMORY_USAGE = Gauge(
+    'engine_memory_usage_bytes', 
+    'Current memory usage of the engine', 
+    registry=registry # 👈 여기도요!
+)
 
 def _make_driver(headless: bool = True):
     """Selenium Chrome WebDriver 생성 (동적 렌더링 필요 시 사용)."""
@@ -161,6 +166,8 @@ def run(
 
         print(f"✔ Successfully processed {cert} - {t['name']}")
 
+        push_to_gateway('pushgateway:9091', job='batch-engine', registry=registry)
+
 
     # 최종 스키마 검증
     RootV1.model_validate(root)
@@ -241,13 +248,6 @@ def main():
     p.add_argument("--config", help="사용할 YAML 경로 (예: .\\private-cert-crawl\\configs\\cert_map.yaml)")
     args = p.parse_args()
 
-    try:
-        # 도커 컴포즈의 내부 포트(Right side)와 일치시켜야 함!
-        start_http_server(8010) 
-        print("🚀 Prometheus metrics server started on port 8010")
-    except Exception as e:
-        print(f"⚠️ Metrics server start failed: {e}")
-
     cfg = load_cfg(args.config)
     cert = args.cert or _infer_cert_from_cwd(cfg)
     if not cert:
@@ -260,6 +260,14 @@ def main():
         tabs = [s.strip() for s in args.tabs.split(",") if s.strip()]
 
     run(cert=cert, tabs=tabs, out=out, config_path=args.config)
+
+    # ✅ 모든 작업(run)이 끝난 직후, 딱 한 번 우체통으로 데이터를 던집니다!
+    try:
+        # 도커 네트워크 안이므로 서비스 이름인 'pushgateway'를 사용합니다.
+        push_to_gateway('pushgateway:9091', job=f'batch-engine-{cert}', registry=registry)
+        print(f"📤 Metrics successfully pushed to Pushgateway for {cert}")
+    except Exception as e:
+        print(f"⚠️ Failed to push metrics: {e}")
 
 if __name__ == "__main__":
     main()

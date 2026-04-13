@@ -65,3 +65,8 @@ cookies.txt
 
 # 2. 각 자격증 폴더 안에 생기는 크롤링 결과 폴더 무시
 **/data/
+
+
+# Docker Data
+prometheus_data/
+grafana_data/
