@@ -166,8 +166,6 @@ def run(
 
         print(f"✔ Successfully processed {cert} - {t['name']}")
 
-        push_to_gateway('pushgateway:9091', job='batch-engine', registry=registry)
-
 
     # 최종 스키마 검증
     RootV1.model_validate(root)
