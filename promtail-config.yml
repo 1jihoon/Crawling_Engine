@@ -1,0 +1,28 @@
+server:
+
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: varlogs
+        __path__: /var/log/dnf.log  # 예시: 시스템 전체보다는 특정 로그만
+
+  - job_name: docker
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        job: engine_logs # 이름을 더 구체적으로 변경
+        # 이 경로는 유지하되, 나중에 그라파나에서 컨테이너 이름으로 필터링하는 게 일반적입니다.
+        __path__: /var/lib/docker/containers/*/*.log

@@ -5,13 +5,14 @@ services:
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     working_dir: /app/private-cert-crawl  # 이 줄을 추가!
     volumes:
-      - .:/app:Z
+      - ./run_once.py:/app/run_once.py:Z # 실행 스크립트만 콕 집어서 하나만 연결 (보안 유지!)
+      - ./private-cert-crawl:/app/private-cert-crawl:Z # .:/app 대신 특정 폴더만 지정
       - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화 추가
     env_file:
       - .env
     environment:
       - TZ=Asia/Seoul
-    command: python ../run_once.py --cert ${CERT} --config ./configs/cert_map.yaml
+    command: python ../run_once.py --cert ${CERT:-NOT_SET} --config ./configs/cert_map.yaml
 
   public-engine:
     build: .
@@ -19,12 +20,12 @@ services:
     shm_size: '2gb'  # 공유 메모리를 2GB로 늘려줍니다. (핵심!)
     working_dir: /app/public_cert_api  # 작업실을 공공 폴더 안으로!
     volumes:
-      - .:/app:Z
+      - ./public_cert_api:/app/public_cert_api:Z # 폴더 전체가 아닌 필요한 소스만
       - ../cert_data:/cert_data:Z
       - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화 추가
     env_file:
       - .env
-    command: python -m public_cert_api.run_public --root /cert_data --jmcd ${JMCD} --mode http
+    command: python -m public_cert_api.run_public --root /cert_data --jmcd ${JMCD:-0000} --mode http
     environment:
       - PYTHONPATH=/app # 이게 핵심입니다! 이 한 줄이 있으면 -m 없이도 경로를 잘 찾습니다.
       - CERT_DATA_DIR=/cert_data  # 이 줄을 추가하세요!
@@ -63,9 +64,37 @@ services:
       - "127.0.0.1:3000:3000" # 그라파나 대시보드 접속용
     volumes:
       - grafana_data:/var/lib/grafana  # 👈 이 줄이 핵심입니다!
+    networks:
+      - monitoring  # 이 줄이 반드시 있어야 합니다!
     restart: always
+
+  loki:
+    image: grafana/loki:2.9.0
+    ports:
+      - "127.0.0.1:3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:2.9.0
+    user: root  # 루트 권한으로 실행하여 파일 접근 허용
+    security_opt:
+    - label:disable # SELinux의 제약을 이 컨테이너에서만 끕니다. (성벽은 유지하되 이 문만 여는 격)
+    volumes:
+      - /var/log:/var/log:ro
+      - ./promtail-config.yml:/etc/promtail/config.yml:ro,z
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitoring
 
 # 4. 마지막 줄에 볼륨 정의 추가 (이게 핵심!)
 volumes:
   prometheus_data:
   grafana_data:
+
+
+networks:
+  monitoring:
+    driver: bridge
