@@ -72,6 +72,8 @@ services:
     image: grafana/loki:2.9.0
     ports:
       - "127.0.0.1:3100:3100"
+    volumes:
+      - loki_data:/loki  # 도커가 관리하는 안전한 '금고' 연결
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - monitoring
@@ -79,6 +81,8 @@ services:
   promtail:
     image: grafana/promtail:2.9.0
     user: root  # 루트 권한으로 실행하여 파일 접근 허용
+    ports:
+      - "127.0.0.1:9080:9080"
     security_opt:
     - label:disable # SELinux의 제약을 이 컨테이너에서만 끕니다. (성벽은 유지하되 이 문만 여는 격)
     volumes:
@@ -93,7 +97,8 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
-
+  loki_data:
+  # 도커 엔진에게 "금고 하나 만들어줘"라고 명령
 
 networks:
   monitoring:
