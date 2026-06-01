@@ -54,6 +54,8 @@ services:
       - /etc/localtime:/etc/localtime:ro # 🕒 시간 동기화
     environment:
       - TZ=Asia/Seoul
+    networks:
+      - monitoring
     restart: always
 
 
