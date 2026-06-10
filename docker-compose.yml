@@ -13,6 +13,8 @@ services:
     environment:
       - TZ=Asia/Seoul
     command: python ../run_once.py --cert ${CERT:-NOT_SET} --config ./configs/cert_map.yaml
+    networks:       # 👈 이 줄을 반드시 추가하세요!
+      - monitoring  # 👈 이 줄을 반드시 추가하세요!
 
   public-engine:
     build: .
@@ -30,6 +32,8 @@ services:
       - PYTHONPATH=/app # 이게 핵심입니다! 이 한 줄이 있으면 -m 없이도 경로를 잘 찾습니다.
       - CERT_DATA_DIR=/cert_data  # 이 줄을 추가하세요!
       - TZ=Asia/Seoul
+    networks:       # 👈 이 줄을 반드시 추가하세요!
+      - monitoring  # 👈 이 줄을 반드시 추가하세요!
 
   # 1. 우체통(Pushgateway) 추가
   pushgateway:
@@ -40,6 +44,8 @@ services:
     environment:
       - TZ=Asia/Seoul
     restart: always
+    networks:  # 👈 추가
+      - monitoring
 
 
   # 🛰️ 2. 관제실(Prometheus) - 우체통에서 데이터를 수거할 곳
