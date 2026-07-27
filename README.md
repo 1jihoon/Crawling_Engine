@@ -240,20 +240,20 @@ flowchart LR
 * **システムの可視性(Visibility)確保:** テキストログを個別に確認していた従来の方式から脱却し、Grafanaダッシュボードを通じてCPU/メモリ資源およびパイプラインの状態を視覚的に  一目で把握できるよう高度化しました。
 * **障害追跡時間の大幅短縮:** LokiとPromtailの導入により、分散されたコンテナのログを一箇所に 集約し、システム例外の発生時に原因分析およびトラブルシューティング(Troubleshooting)にかかる時間を大幅に短縮しました。
 
-## 8. 환경 설정 가이드 (Environment Setup)
+## 8. 環境設定ガイド (Environment Setup)
 
-본 프로젝트는 원활한 개발 및 운영을 위해 두 가지 실행 환경을 제공합니다. 
+本プロジェクトは、スムーズな開発および運用のために2つの実行環境を提供します。
 
-* **Option 1 (가상환경):** 코드 수정 및 로컬 테스트 등 **개발 단계**에서 빠른 피드백을 위해 사용합니다.
-* **Option 2 (Docker):** 실제 운영 환경과 동일한 조건에서 **엔진을 시연하거나 배포**할 때 사용하며, 환경 의존성 없이 즉시 실행 가능합니다. (권장)
+* **Option 1 (仮想環境):** コード修正およびローカルテストなど、**開発段階での迅速なフィードバック**のために使用します。
+* **Option 2 (Docker):** 実際の運用環境と同等の conditional(条件)で**エンジンをデモンストレーション・配包(デプロイ)する際**に使用し、環境依存性なく即座に実行可能です。（推奨）
 
-## 1. Linux (Fedora 기준)
-1. **시스템 패키지 설치**
+## 1. Linux (Fedora 基準)
+1. **システムパッケージのインストール**
    ```bash
    sudo dnf install gcc postgresql-devel
    ```
 
-2. **가상환경 구축 및 의존성 설치**
+2. **仮想環境の構築および依存関係のインストール**
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
@@ -261,81 +261,81 @@ flowchart LR
    pip install -r requirements.txt
    ```
 
-3. **가상환경 활성화**
+3. **仮想環境の有効化**
    ```bash
    source .venv/bin/activate
    ```
 
-4. **엔진 실행(가상환경에서 공공 자격증 추출)**
+4. **エンジンの実行 (仮想環境で公的資格データを抽出)**
    ```bash
    python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
    ```
 
-5. **엔진 실행(가상환경에서 민간 자격증 추출)**
+5. **エンジンの実行 (仮想環境で民間資格データを抽出)**
    ```bash
-   python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+   python run_once.py --cert [資格名] --config private-cert-crawl/configs/cert_map.yaml
    # 예: linux_master
    ```
 
-6. **도커 설치(Linux 기준)**
+6. **Dockerのインストール (Linux 基準)**
    ```bash
-   # 1. Docker 및 Docker Compose 설치
+   # 1. Docker および Docker Compose のインストール
    sudo dnf install -y docker docker-compose
 
-   # 2. Docker 서비스 시작 및 부팅 시 자동 실행 설정
+   # 2. Docker サービスの起動および OS 起動時の自動実行設定
    sudo systemctl start docker
    sudo systemctl enable docker
 
-   # 3. (선택) sudo 없이 도커 사용을 위한 사용자 그룹 추가
+   # 3. (任意) sudo なしで Docker を run(実行)するためのユーザーグループ追加
    sudo usermod -aG docker $USER
-   # 이후 로그아웃 후 다시 로그인해야 적용됩니다.
+   # ※ 設定後、再ログインすることで group(グループ)権限が適用されます。
    ```
 
-7. **엔진 빌드 (최초 1회 또는 코드 수정 시)**
+7. **エンジンのビルド (初回またはコード修正時)**
    ```bash
    docker compose build
    ```
 
-8. **엔진 실행 (도커에서 공공 자격증 추출)**
+8. **エンジンの実行 (Docker環境で公的資格データを抽出)**
    ```bash
    JMCD=1320 docker-compose up -d public-engine
    ```
 
-9. **엔진 실행(도커에서 민간 자격증 추출)**
+9. **エンジンの実行 (Docker環境で民間資格データを抽出)**
    ```bash
    CERT=linux_master docker-compose up -d private-engine
    ```
 
-10. **전체 종목 일괄 수집**
+10. **全種目の一括収集**
     ```bash
     while read -r jmcd; do 
-         echo "▶️ 현재 수집 중인 종목 코드: $jmcd"
+         echo "▶️ 現在収集中の種目コード: $jmcd"
          JMCD=$jmcd docker-compose up public-engine
     done < others.txt
     ```
 
-12. **보안 및 권한 관리**
+12. **セキュリティおよび権限管理**
     ```bash
-    # 1. 소유권 변경 (현재 사용자로 지정)
+    # 1. 所有権の変更 (現在のユーザーに 指定)
     sudo chown -R $USER:$USER ~/cert_data
 
-    # 2. 디렉토리 권한 (755): 리스트 조회 및 진입 허용
+    # 2. ディレクトリ権限 (755): リスト照会および進入を許可
     find ~/cert_data -type d -exec chmod 755 {} +
 
-    # 3. 파일 권한 (644): 읽기/쓰기 허용 (실행 방지)
+    # 3. ファイル権限 (644): 読み取り/書き込みを許可 (実行防止)
     find ~/cert_data -type f -exec chmod 644 {} +
 
-    # 4. SELinux 보안 라벨 (Fedora 등 특정 환경 필요 시)  
+    # 4. SELinux セキュリティラベル (Fedora 等の特定環境で必要な場合) 
     sudo chcon -Rt svirt_sandbox_file_t ~/cert_data
     ```     
 
 ## 1. Windows
-1. **Python 설치**
+1. **Python のインストール**
    ```bash
    winget install Python.Python.3.11
    ```
 
-2. **가상환경 구축 및 의존성 설치**
+2. **仮想環境の構築および依存関係の インストール**
    ```bash
    python -m venv .venv
    .\.venv\Scripts\Activate.ps1
@@ -343,42 +343,42 @@ flowchart LR
    python -m pip install -r requirements.txt
    ```
 
-3. **가상환경 활성화**
+3. **仮想環境の有効化**
    ```bash
    .\.venv\Scripts\activate
    ```
    
-4. **엔진 실행(가상환경에서 공공 자격증 추출)**
+4. **エンジンの実行 (仮想環境で公的資格データを抽出)**
    ```bash
    python -m public_cert_api.run_public --root "../cert_data" --jmcd 1320 --mode http
    ```
 
-5. **엔진 실행(가상환경에서 민간 자격증 추출)**
+5. **エンジンの実行 (仮想環境で民間資格データを抽出)**
    ```bash
-   python run_once.py --cert [자격증이름] --config private-cert-crawl/configs/cert_map.yaml
+   python run_once.py --cert [資格名] --config private-cert-crawl/configs/cert_map.yaml
    # 예: linux_master
    ```
 
-6. **Windows 환경**
-   - **Docker Desktop 설치**: Docker 공식 홈페이지에서 설치 파일을 다운로드하여 설치합니다.
-   - **가상화 설정**: BIOS에서 Virtualization(VT-x/AMD-V)이 활성화되어 있어야 하며, WSL2 기반 설정을 권장합니다.
-   - **실행 확인**: 터미널에서 명령어를 입력하기 전, 반드시 Docker Desktop 앱을 실행하여 'Engine Running' 상태인지 확인해야 합니다.
+6. **Windows 環境**
+   - **Docker Desktop のインストール**: Docker 公式ウェブサイトから setup ファイルをダウンロードしてインストールします。
+   - **仮想化設定**: BIOS で Virtualization (VT-x/AMD-V) が有効化されている必要があり、WSL2 ベースの設定を推奨します。
+   - **実行確認**: ターミナルで コマンドを入力する前に、必ず Docker Desktop アプリを起動し「Engine Running」状態であることを確認してください。
 
-7. **엔진 실행 (도커에서 공공 자격증 추출)**
+7. **エンジンの実行 (Docker環境で公的資格データを抽出)**
    ```bash
    $env:JMCD="1320"; docker-compose up -d public-engine
    ```
 
-8. **엔진 실행(도커에서 민간 자격증 추출)**
+8. **エンジンの実行 (Docker環境で民間資格データを抽出)**
    ```bash
    $env:CERT="linux_master"; docker-compose up -d private-engine
    ```
 
 
-9. **전체 종목 일괄 수집(Windows 환경은 Docker 파일 시스템 동기화로 인해 대량 수집 시 속도가 매우 느려질 수 있으므로, 가급적 Linux 환경 사용을 권장합니다)**
+9. **全種目の一括収集(Windows 環境は Docker のファイルシステム同期の特性上、大量収集時に速度が大幅に低下する可能性があるため、なるべく Linux 環境での実行を推奨します.)**
    ```bash
    foreach ($jmcd in Get-Content others.txt) {
-      Write-Host "▶️ 현재 수집 중인 종목 코드: $jmcd"
+      Write-Host "▶️ 現在収集中の種目コード: $jmcd"
       $env:JMCD = $jmcd.Trim()
       docker-compose up public-engine
    }
